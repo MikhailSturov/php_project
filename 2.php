@@ -18,4 +18,23 @@ function convertString($a, $b) {
     return $result;
 }
 
+//----------------------------------------- Задача 2
+
+function mySortForKey ($a, $b) {
+    $d = [];
+    foreach ($a as $key => $value) {
+        try {
+            if ( ! array_key_exists($b, $value) ) {
+                throw new Exception("Ключ $b отсутствует в массиве $key");
+            }
+        } catch (Exception $e) {
+            echo $e -> getMessage();
+        }
+        $d[$key] = $value[$b];
+    }
+    array_multisort($d, SORT_ASC, $a);
+    $result = $a ;
+    return $result;
+}
+
 ?>

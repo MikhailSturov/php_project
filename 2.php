@@ -173,4 +173,65 @@ function importXml($a) {
     mysqli_close($con);
 }
 
+//----------------------------------------- Задача 4
+
+function exportXml($a, $b) {
+    $con = new mysqli("localhost","admin","", "test_samson");
+    if ($con -> connect_error) {
+        die("Connection failed: " . $con -> connect_error);
+    }
+    echo "Connection successfully";
+    $xml = simplexml_load_file("$a");
+// id всех необходимых категорий
+    $sql = mysqli_query($con, "SELECT `id` FROM `a_category` WHERE `name` = '$b'");
+    $result = mysqli_fetch_assoc($sql)['id'];
+    $idCategory[] = $result;
+    $sql = mysqli_query($con, "SELECT `id` FROM `a_category` WHERE `parent_id` = '$result'");
+    while ( $rec = mysqli_fetch_assoc($sql)) {
+        $idCategory[] = $rec['id'];
+    }
+// id всех необходимых товаров
+    foreach ($idCategory as $value) {
+        $sql = mysqli_query($con, "SELECT `product_id` FROM `product_category` WHERE `category_id` = '$value'");
+        while ( $rec = mysqli_fetch_assoc($sql)) {
+            $idProduct[] = $rec['product_id'];
+        }
+    }
+
+    $i = 0;
+    foreach ($idProduct as $value) {
+        $nodeProduct = $xml->addChild('Товар');
+        $sql = mysqli_query($con, "SELECT `code`, `name` FROM `a_product` WHERE `id` = '$value'");
+        $item = mysqli_fetch_assoc($sql);
+        $code = $item['code'];
+        $name = $item['name'];
+        $nodeProduct->addAttribute('Код', $code);
+        $nodeProduct->addAttribute('Название', $name);
+        $sql = mysqli_query($con, "SELECT `price_type`, `price`  FROM `a_price` WHERE `product_id` = '$value'");
+        while ( $rec = mysqli_fetch_assoc($sql)) {
+            $priceType = $rec['price_type'];
+            $price = $rec['price'];
+            $nodePrice = $nodeProduct->addChild('Цена', $price);
+            $nodePrice->addAttribute('Тип', $priceType);
+        }
+        $sql = mysqli_query($con, "SELECT `property_value`  FROM `a_property` WHERE `product_id` = '$value'");
+        $nodeProperty = $nodeProduct->addChild('Свойства');
+        while ( $rec = mysqli_fetch_assoc($sql)) {
+            $property = $rec['property_value'];
+            $nodeProperty->addChild('Свойство', $property);
+        }
+        $sql = mysqli_query($con, "SELECT `category_id` FROM `product_category` WHERE `product_id` = '$value'");
+        $nodeCategory = $nodeProduct->addChild('Разделы');
+        while ( $rec = mysqli_fetch_assoc($sql) ) {
+            $id = $rec['category_id'];
+            $sql2 = mysqli_query($con, "SELECT `name` FROM `a_category` WHERE `id` = '$id'");
+            $category = mysqli_fetch_assoc($sql2)['name'];
+            $nodeCategory->addChild('Раздел', $category);
+        }
+        $xml->asXML("$a");
+        $i++;
+    }
+    mysqli_close($con);
+}
+
 ?>

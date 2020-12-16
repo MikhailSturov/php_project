@@ -1,4 +1,5 @@
 <?php
+
 namespace Test3;
 
 class newBase
@@ -12,7 +13,7 @@ class newBase
     function __construct(int $name = 0) //function __construct(string $name)
     {
         if (empty($name)) {
-            while (array_search(self::$count, self::$arSetName) != false) {
+            while (array_search(self::$count, self::$arSetName) != false) { //while (array_search(self::$count, self::$arSetName) !== false) {
                 ++self::$count;
             }
             $name = self::$count;
@@ -132,7 +133,7 @@ class newView extends newBase
     public function getName(): string
     {
         if (empty($this->name)) {
-            throw new Exception('The object doesn\'t have name');
+            throw new Exception('The object doesn\'t have name'); //throw new \Exception('The object doesn\'t have name');
         }
         return '"' . $this->name . '": ';
     }
@@ -160,7 +161,7 @@ class newView extends newBase
                 . $this->getType()
                 . $this->getSize()
                 . "\r\n";
-        } catch (Exception $exc) {
+        } catch (Exception $exc) { //} catch (\Exception $exc) {
             echo 'Error: ' . $exc->getMessage();
         }
     }
@@ -182,20 +183,24 @@ class newView extends newBase
     static public function load(string $value): newBase
     {
         $arValue = explode(':', $value);
-        return (new newBase($arValue[0]))
-            ->setValue(unserialize(substr($value, strlen($arValue[0]) + 1
-                + strlen($arValue[1]) + 1), $arValue[1])) //+ strlen($arValue[1]) + 1, $arValue[1])))
-            ->setProperty(unserialize(substr($value, strlen($arValue[0]) + 1
-                + strlen($arValue[1]) + 1 + $arValue[1])));
+        return (new newBase($arValue[0])) //return (new newView($arValue[0]))
+        ->setValue(unserialize(substr($value, strlen($arValue[0]) + 1
+            + strlen($arValue[1]) + 1), $arValue[1])) //+ strlen($arValue[1]) + 1, $arValue[1])))
+        ->setProperty(unserialize(substr($value, strlen($arValue[0]) + 1
+            + strlen($arValue[1]) + 1 + $arValue[1])));
     }
 }
 
 function gettype($value): string
 {
+    //if (is_object($value) && !($value instanceof Test3\newBase)) {
+    //  return 'test';
+    // }
+    //return \gettype($value);
     if (is_object($value)) {
         $type = get_class($value);
         do {
-            if (strpos($type, "Test3\newBase") !== false) { //if (strpos($type, 'Test3\newBase') !== false) {
+            if (strpos($type, "Test3\newBase") !== false) {
                 return 'test';
             }
         } while ($type = get_parent_class($type));
